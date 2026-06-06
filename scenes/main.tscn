@@ -6,8 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://cyshv7vmaxcgm" path="res://scenes/player/player.tscn" id="2_tbgi4"]
 [ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="3_tbgi4"]
 [ext_resource type="Script" uid="uid://cxyikecv5b7lf" path="res://scripts/ui/ResourcePanel.gd" id="4_fm80t"]
-[ext_resource type="Script" uid="uid://dq3p1n7w8m1ci" path="res://scripts/debug/CoinDebugInput.gd" id="5_debug"]
+[ext_resource type="Script" uid="uid://dt26v6dib63sx" path="res://scripts/debug/DebugActions.gd" id="5_debug_actions"]
 [ext_resource type="PackedScene" uid="uid://dydwc54jy6sv8" path="res://scenes/recruitment/RecruitCamp.tscn" id="6_camp"]
+[ext_resource type="Script" uid="uid://ci130putnt65y" path="res://scripts/professions/ProfessionDefinition.gd" id="7_jscy8"]
 [ext_resource type="PackedScene" uid="uid://cvyx7yk1n2qdi" path="res://scenes/jobs/HammerStand.tscn" id="8_hammer"]
 [ext_resource type="PackedScene" uid="uid://br64nylmike75" path="res://scenes/jobs/BowStand.tscn" id="9_bow"]
 [ext_resource type="PackedScene" uid="uid://caw5tg6xgij1k" path="res://scenes/construction/BuildSite.tscn" id="10_buildsite"]
@@ -17,6 +18,10 @@
 [ext_resource type="PackedScene" uid="uid://cai30k6b0f46q" path="res://scenes/enemies/Greed.tscn" id="14_greed"]
 [ext_resource type="Script" uid="uid://cf5ysoq1gljwy" path="res://scripts/managers/GameManager.gd" id="15_gameover_mgr"]
 [ext_resource type="Script" uid="uid://c2rnoolpom7ad" path="res://scripts/ui/GameOverOverlay.gd" id="16_gameover_ui"]
+[ext_resource type="Script" uid="uid://bxjf7rj6dme8p" path="res://scripts/debug/DebugMenu.gd" id="17_debug_menu"]
+[ext_resource type="PackedScene" uid="uid://dsxhlg4md37e8" path="res://scenes/npc/Villager.tscn" id="18_villager"]
+[ext_resource type="Resource" path="res://resources/professions/builder.tres" id="19_builder_profession"]
+[ext_resource type="Resource" path="res://resources/professions/archer.tres" id="20_archer_profession"]
 
 [sub_resource type="Resource" id="Resource_tefeu"]
 script = ExtResource("3_tbgi4")
@@ -45,8 +50,22 @@ right_spawn_path = NodePath("../../World/RuntimeObjects/EnemySpawnRight")
 target_path = NodePath("../../World/KingdomCenter")
 greed_scene = ExtResource("14_greed")
 
-[node name="CoinDebugInput" type="Node" parent="Managers" unique_id=1657343821]
-script = ExtResource("5_debug")
+[node name="DebugActions" type="Node" parent="Managers" unique_id=1657343821]
+script = ExtResource("5_debug_actions")
+time_manager_path = NodePath("../TimeManager")
+villager_parent_path = NodePath("../../World/RuntimeObjects/Villagers")
+enemy_parent_path = NodePath("../../World/RuntimeObjects/Enemies")
+villager_spawn_path = NodePath("../../World/KingdomCenter")
+left_enemy_spawn_path = NodePath("../../World/RuntimeObjects/EnemySpawnLeft")
+right_enemy_spawn_path = NodePath("../../World/RuntimeObjects/EnemySpawnRight")
+enemy_target_path = NodePath("../../World/KingdomCenter")
+villager_scene = ExtResource("18_villager")
+greed_scene = ExtResource("14_greed")
+spawnable_professions = Array[ExtResource("7_jscy8")]([ExtResource("19_builder_profession"), ExtResource("20_archer_profession")])
+
+[node name="DebugMenu" type="CanvasLayer" parent="Managers" unique_id=1657343822]
+script = ExtResource("17_debug_menu")
+debug_actions_path = NodePath("../DebugActions")
 
 [node name="World" type="Node2D" parent="." unique_id=2001009394]
 
@@ -151,11 +170,11 @@ theme_override_constants/separation = 8
 
 [node name="TitleLabel" type="Label" parent="UI/CoinBar/PanelContainer/MarginContainer/VBoxContainer" unique_id=257622298]
 layout_mode = 2
-text = "CoinBar"
+text = "资源"
 
 [node name="TotalLabel" type="Label" parent="UI/CoinBar/PanelContainer/MarginContainer/VBoxContainer" unique_id=2116319981]
 layout_mode = 2
-text = "Coins: 0"
+text = "金币: 0"
 
 [node name="LastChangeLabel" type="Label" parent="UI/CoinBar/PanelContainer/MarginContainer/VBoxContainer" unique_id=1939703489]
 visible = false
@@ -198,11 +217,11 @@ theme_override_constants/separation = 6
 
 [node name="TitleLabel" type="Label" parent="UI/DayNightIndicator/PanelContainer/MarginContainer/VBoxContainer" unique_id=1353807954]
 layout_mode = 2
-text = "Day 1 - Day"
+text = "第 1 天 - 白天"
 
 [node name="TimerLabel" type="Label" parent="UI/DayNightIndicator/PanelContainer/MarginContainer/VBoxContainer" unique_id=461228405]
 layout_mode = 2
-text = "90s remaining"
+text = "剩余 90 秒"
 
 [node name="PhaseBar" type="ProgressBar" parent="UI/DayNightIndicator/PanelContainer/MarginContainer/VBoxContainer" unique_id=545049332]
 layout_mode = 2
@@ -260,11 +279,11 @@ alignment = 1
 [node name="TitleLabel" type="Label" parent="UI/GameOverOverlay/PanelContainer/MarginContainer/VBoxContainer" unique_id=445566006]
 layout_mode = 2
 theme_override_font_sizes/font_size = 36
-text = "GAME OVER"
+text = "游戏结束"
 horizontal_alignment = 1
 
 [node name="HintLabel" type="Label" parent="UI/GameOverOverlay/PanelContainer/MarginContainer/VBoxContainer" unique_id=445566007]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "金币被搜刮一空 — 按 R 重开"
+text = "金币被抢光了，按 R 重新开始"
 horizontal_alignment = 1

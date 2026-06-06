@@ -7,6 +7,7 @@ extends Area2D
 @export var tool_type: StringName = &"builder"
 @export var display_name: String = "Hammer"
 @export var cost: int = 2
+@export var profession: ProfessionDefinition
 
 @onready var prompt_label: Label = $PromptLabel
 @onready var pickup_point: Marker2D = $ToolPickupPoint
@@ -15,7 +16,7 @@ var _player_in_range: bool = false
 var _pending_count: int = 0
 
 func _ready() -> void:
-	add_to_group("task_provider")
+	add_to_group(GameGroups.TASK_PROVIDER)
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	ResourceManager.coins_changed.connect(_on_coins_changed)
@@ -29,10 +30,24 @@ func _unhandled_input(event: InputEvent) -> void:
 # ---- Task provider contract ----
 
 func start_work(claimant: Node, task: Task) -> bool:
-	if claimant == null or not claimant.has_method("equip_tool"):
+	if claimant == null:
+		return false
+	if task == null or task.provider != self or _pending_count <= 0:
 		return false
 
-	claimant.call("equip_tool", tool_type)
+	var assigned: bool = false
+	if profession != null and claimant.has_method("assign_profession"):
+		claimant.call("assign_profession", profession)
+		assigned = true
+	elif claimant.has_method("equip_tool"):
+		claimant.call("equip_tool", tool_type)
+		assigned = true
+
+	if not assigned:
+		return false
+
+	if claimant.has_method("set_home_position"):
+		claimant.call("set_home_position", pickup_point.global_position)
 
 	if claimant.has_method("finish_work"):
 		claimant.call("finish_work")
@@ -45,12 +60,12 @@ func start_work(claimant: Node, task: Task) -> bool:
 # ---- Internal ----
 
 func _on_body_entered(body: Node2D) -> void:
-	if body.is_in_group("player") or body.name == "Player":
+	if body.is_in_group(GameGroups.PLAYER):
 		_player_in_range = true
 		_refresh_prompt()
 
 func _on_body_exited(body: Node2D) -> void:
-	if body.is_in_group("player") or body.name == "Player":
+	if body.is_in_group(GameGroups.PLAYER):
 		_player_in_range = false
 		_refresh_prompt()
 
@@ -67,7 +82,7 @@ func _try_buy_tool() -> void:
 	task.kind = Task.Kind.TOOL_PICKUP
 	task.position = pickup_point.global_position
 	task.provider = self
-	task.payload = {"tool_type": tool_type}
+	task.payload = {"tool_type": tool_type, "profession": profession}
 	TaskBoard.post_task(task)
 
 	_pending_count += 1

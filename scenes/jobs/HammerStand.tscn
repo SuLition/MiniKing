@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cvyx7yk1n2qdi"]
 
 [ext_resource type="Script" uid="uid://br8sy0igk7yjo" path="res://scripts/jobs/JobPoint.gd" id="1_hammer"]
+[ext_resource type="Resource" path="res://resources/professions/builder.tres" id="2_builder_profession"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_07v3e"]
 size = Vector2(56, 60)
@@ -9,6 +10,7 @@ size = Vector2(56, 60)
 collision_layer = 8
 collision_mask = 2
 script = ExtResource("1_hammer")
+profession = ExtResource("2_builder_profession")
 
 [node name="Stand" type="Polygon2D" parent="." unique_id=119509231]
 position = Vector2(0, -24)

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ProfessionDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/professions/ProfessionDefinition.gd" id="1_builder_profession"]
+
+[resource]
+script = ExtResource("1_builder_profession")
+id = &"builder"
+display_name = "建造者"
+tool_id = &"hammer"
+base_max_hp = 2
+base_walk_speed = 70.0
+task_kinds = Array[int]([1])
+behavior_tags = Array[StringName]([&"construction"])
+body_color = Color(0.9, 0.58, 0.18, 1)
+show_role_label = true

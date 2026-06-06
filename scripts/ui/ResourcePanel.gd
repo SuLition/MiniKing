@@ -4,7 +4,7 @@ extends Control
 @onready var total_label: Label = $PanelContainer/MarginContainer/VBoxContainer/TotalLabel
 
 func _ready() -> void:
-	title_label.text = "CoinBar"
+	title_label.text = "资源"
 	_hide_optional_legacy_labels()
 	ResourceManager.coins_changed.connect(_on_coins_changed)
 	_refresh_coins(ResourceManager.get_coins())
@@ -13,7 +13,7 @@ func _on_coins_changed(_before_amount: int, after_amount: int, _delta_amount: in
 	_refresh_coins(after_amount)
 
 func _refresh_coins(amount: int) -> void:
-	total_label.text = "Coins: %d" % amount
+	total_label.text = "金币: %d" % amount
 
 func _hide_optional_legacy_labels() -> void:
 	for node_name in ["LastChangeLabel", "BeforeAfterLabel"]:

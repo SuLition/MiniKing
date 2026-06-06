@@ -33,7 +33,7 @@ func _on_body_entered(other_body: Node) -> void:
 	if _spent or other_body == null:
 		return
 
-	if not other_body.is_in_group("damageable"):
+	if not other_body.is_in_group(GameGroups.DAMAGEABLE):
 		return
 
 	if other_body.has_method("apply_damage"):

@@ -14,7 +14,8 @@ signal destroyed
 @export var contact_damage_interval: float = 1.0
 @export var contact_damage_distance: float = 40.0
 
-@onready var body: Polygon2D = $Body
+@onready var visual: GreedVisual = $AnimatedSprite2D as GreedVisual
+@onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
 var hp: int = 3
 var _target_position: Vector2 = Vector2.ZERO
@@ -22,49 +23,38 @@ var _has_target: bool = false
 var _attack_target: Node = null
 var _attack_timer: float = 0.0
 var _contact_effect_timer: float = 0.0
+var _dying: bool = false
 
 func _ready() -> void:
-	add_to_group("greed")
-	add_to_group("damageable")
+	add_to_group(GameGroups.GREED)
+	add_to_group(GameGroups.DAMAGEABLE)
 	hp = max_hp
-	_update_damage_visual()
+	if visual != null:
+		visual.play_idle()
 
 func apply_damage(amount: int) -> void:
-	if amount <= 0 or hp <= 0:
+	if amount <= 0 or hp <= 0 or _dying:
 		return
 
 	hp = max(hp - amount, 0)
 	hp_changed.emit(hp, max_hp)
-	_update_damage_visual()
 
 	if hp == 0:
-		destroyed.emit()
-		queue_free()
+		_begin_death()
+	elif visual != null:
+		visual.play_hurt()
 
 func get_hp() -> int:
 	return hp
-
-func _update_damage_visual() -> void:
-	if body == null:
-		return
-
-	var hp_ratio: float = 1.0
-	if max_hp > 0:
-		hp_ratio = clamp(float(hp) / float(max_hp), 0.0, 1.0)
-
-	var damage_t: float = 1.0 - hp_ratio
-	body.color = Color(
-		lerp(0.18, 0.85, damage_t),
-		lerp(0.16, 0.12, damage_t),
-		lerp(0.28, 0.12, damage_t),
-		1.0
-	)
 
 func set_target_position(target_position: Vector2) -> void:
 	_target_position = target_position
 	_has_target = true
 
 func _physics_process(delta: float) -> void:
+	if _dying:
+		return
+
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
@@ -80,9 +70,10 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_detect_wall_collision()
 	_process_contact_effects(delta)
+	_update_visual_locomotion()
 
 func _refresh_player_target() -> void:
-	for player: Node in get_tree().get_nodes_in_group("player"):
+	for player: Node in get_tree().get_nodes_in_group(GameGroups.PLAYER):
 		if player is Node2D:
 			_target_position = (player as Node2D).global_position
 			_has_target = true
@@ -104,7 +95,7 @@ func _detect_wall_collision() -> void:
 	for index in range(get_slide_collision_count()):
 		var collision: KinematicCollision2D = get_slide_collision(index)
 		var collider: Object = collision.get_collider()
-		if collider is Node and (collider as Node).is_in_group("wall"):
+		if collider is Node and (collider as Node).is_in_group(GameGroups.WALL):
 			_attack_target = collider as Node
 			_attack_timer = 0.0
 			return
@@ -119,6 +110,8 @@ func _attack_wall(delta: float) -> void:
 	if _attack_timer > 0.0:
 		return
 
+	if visual != null:
+		visual.play_attack()
 	_attack_target.call("apply_damage", attack_damage)
 	_attack_timer = max(attack_interval, 0.1)
 
@@ -135,10 +128,14 @@ func _process_contact_effects(delta: float) -> void:
 	if _contact_effect_timer > 0.0:
 		return
 
-	if contact_target.is_in_group("player"):
+	if contact_target.is_in_group(GameGroups.PLAYER):
+		if visual != null:
+			visual.play_attack()
 		ResourceManager.spend_coins(coin_steal_amount)
 		_contact_effect_timer = max(coin_steal_interval, 0.1)
 	elif _can_damage_contact_target(contact_target):
+		if visual != null:
+			visual.play_attack()
 		contact_target.call("apply_damage", attack_damage)
 		_contact_effect_timer = max(contact_damage_interval, 0.1)
 
@@ -146,7 +143,7 @@ func _find_nearest_contact_target() -> Node2D:
 	var nearest: Node2D = null
 	var nearest_distance: float = INF
 
-	for player_node in get_tree().get_nodes_in_group("player"):
+	for player_node in get_tree().get_nodes_in_group(GameGroups.PLAYER):
 		if not player_node is Node2D:
 			continue
 		var player: Node2D = player_node as Node2D
@@ -155,7 +152,7 @@ func _find_nearest_contact_target() -> Node2D:
 			nearest = player
 			nearest_distance = player_distance
 
-	for villager_node in get_tree().get_nodes_in_group("villager"):
+	for villager_node in get_tree().get_nodes_in_group(GameGroups.VILLAGER):
 		if not villager_node is Node2D:
 			continue
 		var villager: Node2D = villager_node as Node2D
@@ -167,4 +164,32 @@ func _find_nearest_contact_target() -> Node2D:
 	return nearest
 
 func _can_damage_contact_target(target: Node) -> bool:
-	return target.is_in_group("damageable") and target.has_method("apply_damage")
+	return target.is_in_group(GameGroups.DAMAGEABLE) and target.has_method("apply_damage")
+
+func _update_visual_locomotion() -> void:
+	if visual != null:
+		visual.update_locomotion(velocity.x)
+
+func _begin_death() -> void:
+	_dying = true
+	velocity = Vector2.ZERO
+	remove_from_group(GameGroups.GREED)
+	remove_from_group(GameGroups.DAMAGEABLE)
+	set_physics_process(false)
+	collision_layer = 0
+	collision_mask = 0
+	if collision_shape != null:
+		collision_shape.set_deferred("disabled", true)
+
+	destroyed.emit()
+
+	if visual == null:
+		queue_free()
+		return
+
+	visual.play_death()
+	_finish_death_after_animation()
+
+func _finish_death_after_animation() -> void:
+	await visual.death_animation_finished
+	queue_free()

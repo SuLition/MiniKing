@@ -9,6 +9,12 @@ enum Phase {
 	DAWN,
 }
 
+const GDD_DAY_DURATION: float = 90.0
+const GDD_NIGHT_DURATION: float = 45.0
+const GDD_DAWN_DURATION: float = 5.0
+
+# Default exports stay short for local iteration; enable this for GDD timing.
+@export var use_gdd_duration_profile: bool = false
 @export var day_duration: float = 20.0
 @export var night_duration: float = 10.0
 @export var dawn_duration: float = 5.0
@@ -88,6 +94,9 @@ func _emit_tick_if_needed(force_emit: bool = false) -> void:
 	time_tick.emit(get_phase_name(), _day_count, current_second, get_phase_duration())
 
 func _get_phase_duration(phase: Phase) -> float:
+	if use_gdd_duration_profile:
+		return _get_gdd_phase_duration(phase)
+
 	match phase:
 		Phase.DAY:
 			return max(day_duration, 1.0)
@@ -95,6 +104,17 @@ func _get_phase_duration(phase: Phase) -> float:
 			return max(night_duration, 1.0)
 		Phase.DAWN:
 			return max(dawn_duration, 1.0)
+		_:
+			return 1.0
+
+func _get_gdd_phase_duration(phase: Phase) -> float:
+	match phase:
+		Phase.DAY:
+			return GDD_DAY_DURATION
+		Phase.NIGHT:
+			return GDD_NIGHT_DURATION
+		Phase.DAWN:
+			return GDD_DAWN_DURATION
 		_:
 			return 1.0
 

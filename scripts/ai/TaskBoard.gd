@@ -24,10 +24,16 @@ func post_task(task: Task) -> void:
 		push_warning("TaskBoard: cannot post null task")
 		return
 
+	if not _is_task_provider_valid(task):
+		push_warning("TaskBoard: cannot post task with invalid provider")
+		return
+
 	_tasks.append(task)
 	task_posted.emit(task)
 
 func claim_nearest(filter: Callable, origin: Vector2) -> Task:
+	_prune_invalid_tasks()
+
 	var nearest: Task = null
 	var nearest_distance: float = INF
 
@@ -62,6 +68,8 @@ func release_task(task: Task) -> void:
 	task.claimed = false
 
 func open_task_count() -> int:
+	_prune_invalid_tasks()
+
 	var count: int = 0
 	for task in _tasks:
 		if not task.claimed:
@@ -70,3 +78,20 @@ func open_task_count() -> int:
 
 func clear() -> void:
 	_tasks.clear()
+
+func _prune_invalid_tasks() -> void:
+	for index in range(_tasks.size() - 1, -1, -1):
+		if not _is_task_provider_valid(_tasks[index]):
+			_tasks.remove_at(index)
+
+func _is_task_provider_valid(task: Task) -> bool:
+	if task == null:
+		return false
+
+	var provider: Node = task.provider
+	return (
+		provider != null
+		and is_instance_valid(provider)
+		and provider.is_in_group(GameGroups.TASK_PROVIDER)
+		and provider.has_method("start_work")
+	)

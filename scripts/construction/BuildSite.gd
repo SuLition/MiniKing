@@ -28,7 +28,7 @@ var _state: State = State.EMPTY
 var _current_task: Task = null
 
 func _ready() -> void:
-	add_to_group("task_provider")
+	add_to_group(GameGroups.TASK_PROVIDER)
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	ResourceManager.coins_changed.connect(_on_coins_changed)
@@ -53,12 +53,12 @@ func start_work(claimant: Node, task: Task) -> bool:
 # ---- Internal ----
 
 func _on_body_entered(body: Node2D) -> void:
-	if body.is_in_group("player") or body.name == "Player":
+	if body.is_in_group(GameGroups.PLAYER):
 		_player_in_range = true
 		_refresh_prompt()
 
 func _on_body_exited(body: Node2D) -> void:
-	if body.is_in_group("player") or body.name == "Player":
+	if body.is_in_group(GameGroups.PLAYER):
 		_player_in_range = false
 		_refresh_prompt()
 

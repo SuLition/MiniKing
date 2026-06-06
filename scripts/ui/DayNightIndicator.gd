@@ -33,8 +33,19 @@ func _refresh_from_manager() -> void:
 	_refresh(phase_name, day_count, seconds_remaining, phase_duration)
 
 func _refresh(phase_name: StringName, day_count: int, seconds_remaining: int, phase_duration: int) -> void:
-	title_label.text = "Day %d - %s" % [day_count, String(phase_name)]
-	timer_label.text = "%ds remaining" % seconds_remaining
+	title_label.text = "第 %d 天 - %s" % [day_count, _phase_display_name(phase_name)]
+	timer_label.text = "剩余 %d 秒" % seconds_remaining
 
 	phase_bar.max_value = max(phase_duration, 1)
 	phase_bar.value = clamp(phase_duration - seconds_remaining, 0, phase_duration)
+
+func _phase_display_name(phase_name: StringName) -> String:
+	match phase_name:
+		&"Day":
+			return "白天"
+		&"Night":
+			return "夜晚"
+		&"Dawn":
+			return "黎明"
+		_:
+			return "未知"

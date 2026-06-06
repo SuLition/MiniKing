@@ -10,8 +10,8 @@ signal destroyed
 var hp: int = 1
 
 func _ready() -> void:
-	add_to_group("wall")
-	add_to_group("damageable")
+	add_to_group(GameGroups.WALL)
+	add_to_group(GameGroups.DAMAGEABLE)
 	hp = max_hp
 	_update_visual()
 

@@ -4,21 +4,19 @@ extends CharacterBody2D
 #
 # 状态机：
 #   IDLE    — poll 找活；超过 idle_to_wander_delay 没找到 → WANDER
-#             非 archer：poll TaskBoard 找 TOOL_PICKUP / CONSTRUCTION
-#             archer：扫描射程内的 Greed → 找到则进 COMBAT
+#             非战斗职业：poll TaskBoard 找可做任务
+#             战斗职业：扫描射程内的 Greed → 找到则进 COMBAT
 #   WANDER  — 在 home_position ±wander_radius 范围内随机漫步；同样在 poll 周期里找活
 #   SEEK    — 走向 _current_task.position；到达后 → WORK
 #   WORK    — 把控制权交给 task.provider，等 provider 回调 finish_work() 后 → IDLE
-#   COMBAT  — 仅 archer 进入：站定，按 attack_interval 射箭；扫描不到 Greed 时退回 IDLE
+#   COMBAT  — 由职业行为标签启用：站定，按 attack_interval 射箭；扫描不到 Greed 时退回 IDLE
 #
-# 工具能力（_tool_type）决定 IDLE / WANDER 周期里"找活"的分支：
-#   ""        → 找 TOOL_PICKUP
-#   "builder" → 找 CONSTRUCTION
-#   "archer"  → 不走 TaskBoard，扫敌；命中即进 COMBAT
+# 职业能力由 ProfessionDefinition 决定；_tool_type 仅保留为过渡兼容字段。
 #
 # 对外接口：
 #   set_home_position(p)  — 设定漫步中心，不强制移动
-#   equip_tool(t)         — 由 task provider 在 start_work 中调用
+#   assign_profession(p)  — 由 task provider 在 start_work 中调用
+#   equip_tool(t)         — 兼容旧工具路径，不应作为新职业系统入口
 #   finish_work()         — 由 task provider 在工作完成时调用
 #
 # 设计约束：
@@ -29,6 +27,7 @@ extends CharacterBody2D
 
 signal state_changed(state_name: StringName)
 signal tool_changed(tool_type: StringName)
+signal profession_changed(profession: ProfessionDefinition)
 signal hp_changed(current_hp: int, max_hp: int)
 signal destroyed
 
@@ -62,6 +61,7 @@ var _home_position: Vector2 = Vector2.ZERO
 var _has_home: bool = false
 var _state: State = State.IDLE
 var _tool_type: StringName = &""
+var _profession: ProfessionDefinition = null
 var _current_task: Task = null
 
 var _poll_timer: float = 0.0
@@ -71,12 +71,13 @@ var _wander_rest_timer: float = 0.0
 var _attack_timer: float = 0.0
 
 func _ready() -> void:
-	add_to_group("villager")
-	add_to_group("damageable")
+	add_to_group(GameGroups.VILLAGER)
+	add_to_group(GameGroups.DAMAGEABLE)
 	hp = max_hp
 	_update_damage_visual()
 	_set_state(State.IDLE)
 	tool_changed.emit(_tool_type)
+	profession_changed.emit(_profession)
 
 # ---- Public API ----
 
@@ -101,11 +102,38 @@ func set_home_position(home_position: Vector2) -> void:
 func get_tool_type() -> StringName:
 	return _tool_type
 
+func assign_profession(profession: ProfessionDefinition) -> void:
+	if _profession == profession:
+		return
+
+	_profession = profession
+	if _profession == null:
+		_tool_type = &""
+	else:
+		_tool_type = _profession.id
+		_profession.notify_assigned(self)
+
+	tool_changed.emit(_tool_type)
+	profession_changed.emit(_profession)
+
+func get_profession_id() -> StringName:
+	if _profession == null:
+		return &""
+	return _profession.id
+
+func get_profession() -> ProfessionDefinition:
+	return _profession
+
+func has_behavior_tag(tag: StringName) -> bool:
+	return _profession != null and _profession.has_behavior_tag(tag)
+
 func equip_tool(tool_type: StringName) -> void:
 	if _tool_type == tool_type:
 		return
 	_tool_type = tool_type
+	_profession = null
 	tool_changed.emit(_tool_type)
+	profession_changed.emit(_profession)
 
 func finish_work() -> void:
 	# Provider 通知本 NPC 工作完成。释放当前任务，回 IDLE。
@@ -199,7 +227,7 @@ func _process_combat(delta: float) -> void:
 	_attack_timer = max(attack_interval, 0.1)
 
 func _try_engage_work_or_combat() -> bool:
-	if _tool_type == &"archer":
+	if _has_combat_behavior():
 		return _try_engage_combat()
 	return _try_claim_task()
 
@@ -219,7 +247,7 @@ func _find_nearest_greed_in_range() -> Node2D:
 	var nearest: Node2D = null
 	var nearest_distance: float = INF
 
-	for greed_node in get_tree().get_nodes_in_group("greed"):
+	for greed_node in get_tree().get_nodes_in_group(GameGroups.GREED):
 		if not greed_node is Node2D:
 			continue
 
@@ -268,13 +296,10 @@ func _can_do_task(task: Task) -> bool:
 	if task == null:
 		return false
 
-	match _tool_type:
-		&"":
-			return task.kind == Task.Kind.TOOL_PICKUP
-		&"builder":
-			return task.kind == Task.Kind.CONSTRUCTION
-		_:
-			return false
+	if _profession != null:
+		return _profession.can_claim_task(self, task)
+
+	return task.kind == Task.Kind.TOOL_PICKUP
 
 func _enter_wander() -> void:
 	_set_state(State.WANDER)
@@ -308,6 +333,11 @@ func _abort_current_task() -> void:
 		TaskBoard.release_task(_current_task)
 		_current_task = null
 	_set_state(State.IDLE)
+
+func _has_combat_behavior() -> bool:
+	if _profession != null:
+		return _profession.has_behavior_tag(ProfessionTags.COMBAT)
+	return false
 
 func _handle_death() -> void:
 	if _current_task != null and _state != State.WORK:

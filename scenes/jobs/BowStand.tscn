@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://br64nylmike75"]
 
 [ext_resource type="Script" uid="uid://br8sy0igk7yjo" path="res://scripts/jobs/JobPoint.gd" id="1_bow"]
+[ext_resource type="Resource" path="res://resources/professions/archer.tres" id="2_archer_profession"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bow01"]
 size = Vector2(56, 60)
@@ -12,6 +13,7 @@ script = ExtResource("1_bow")
 tool_type = &"archer"
 display_name = "Bow"
 cost = 2
+profession = ExtResource("2_archer_profession")
 
 [node name="Stand" type="Polygon2D" parent="."]
 position = Vector2(0, -24)

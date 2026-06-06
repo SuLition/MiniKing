@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ProfessionDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/professions/ProfessionDefinition.gd" id="1_archer_profession"]
+
+[resource]
+script = ExtResource("1_archer_profession")
+id = &"archer"
+display_name = "弓箭手"
+tool_id = &"bow"
+base_max_hp = 2
+base_walk_speed = 70.0
+task_kinds = Array[int]([])
+behavior_tags = Array[StringName]([&"combat"])
+body_color = Color(0.55, 0.78, 0.4, 1)
+show_role_label = true

@@ -57,7 +57,7 @@ func _on_phase_changed(phase_name: StringName, day_count: int, _seconds_remainin
 		_show_night_summary(day_count)
 
 func _clear_enemies() -> void:
-	for enemy: Node in get_tree().get_nodes_in_group("greed"):
+	for enemy: Node in get_tree().get_nodes_in_group(GameGroups.GREED):
 		if is_instance_valid(enemy):
 			enemy.queue_free()
 

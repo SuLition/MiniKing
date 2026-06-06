@@ -20,8 +20,8 @@ func _ready() -> void:
 		_game_manager.connect("game_over", Callable(self, "_on_game_over"))
 
 func _on_game_over() -> void:
-	title_label.text = "GAME OVER"
-	hint_label.text = "金币被搜刮一空 — 按 R 重开"
+	title_label.text = "游戏结束"
+	hint_label.text = "金币被抢光了，按 R 重新开始"
 	visible = true
 
 func _unhandled_input(event: InputEvent) -> void:

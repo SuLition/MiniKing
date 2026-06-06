@@ -24,12 +24,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _on_body_entered(body: Node2D) -> void:
-	if body.is_in_group("player") or body.name == "Player":
+	if body.is_in_group(GameGroups.PLAYER):
 		_player_in_range = true
 		_refresh_prompt()
 
 func _on_body_exited(body: Node2D) -> void:
-	if body.is_in_group("player") or body.name == "Player":
+	if body.is_in_group(GameGroups.PLAYER):
 		_player_in_range = false
 		_refresh_prompt()
 
