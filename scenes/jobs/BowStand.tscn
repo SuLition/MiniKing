@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://br64nylmike75"]
+
+[ext_resource type="Script" uid="uid://br8sy0igk7yjo" path="res://scripts/jobs/JobPoint.gd" id="1_bow"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bow01"]
+size = Vector2(56, 60)
+
+[node name="BowStand" type="Area2D"]
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("1_bow")
+tool_type = &"archer"
+display_name = "Bow"
+cost = 2
+
+[node name="Stand" type="Polygon2D" parent="."]
+position = Vector2(0, -24)
+color = Color(0.32, 0.5, 0.28, 1)
+polygon = PackedVector2Array(-28, 24, -16, -24, 16, -24, 28, 24)
+
+[node name="BowIcon" type="Polygon2D" parent="."]
+position = Vector2(0, -54)
+color = Color(0.78, 0.66, 0.36, 1)
+polygon = PackedVector2Array(-2, -16, 2, -16, 8, -10, 10, 0, 8, 10, 2, 16, -2, 16, -8, 10, -10, 0, -8, -10)
+
+[node name="BowString" type="Polygon2D" parent="."]
+position = Vector2(0, -54)
+color = Color(0.9, 0.88, 0.78, 1)
+polygon = PackedVector2Array(-1, -14, 1, -14, 1, 14, -1, 14)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -30)
+shape = SubResource("RectangleShape2D_bow01")
+
+[node name="ToolPickupPoint" type="Marker2D" parent="."]
+
+[node name="PromptLabel" type="Label" parent="."]
+visible = false
+offset_left = -110.0
+offset_top = -118.0
+offset_right = 150.0
+offset_bottom = -92.0
+text = "E - Buy Bow (2 coins)"

@@ -1,0 +1,36 @@
+[gd_scene load_steps=4 format=3 uid="uid://dsxhlg4md37e8"]
+
+[ext_resource type="Script" uid="uid://bqqobcd2k11gi" path="res://scripts/npc/Villager.gd" id="1_3xmdd"]
+[ext_resource type="Script" uid="uid://b7p41yfgqwh6p" path="res://scripts/npc/VillagerVisual.gd" id="2_visual"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3xmdd"]
+size = Vector2(24, 42)
+
+[node name="Villager" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_3xmdd")
+
+[node name="Body" type="Polygon2D" parent="."]
+color = Color(0.35, 0.62, 0.95, 1)
+polygon = PackedVector2Array(-12, -42, 12, -42, 12, 0, -12, 0)
+
+[node name="Head" type="Polygon2D" parent="."]
+position = Vector2(0, -52)
+color = Color(0.92, 0.75, 0.52, 1)
+polygon = PackedVector2Array(-10, -10, 10, -10, 10, 10, -10, 10)
+
+[node name="RoleLabel" type="Label" parent="."]
+visible = false
+offset_left = -40.0
+offset_top = -86.0
+offset_right = 54.0
+offset_bottom = -60.0
+text = "Villager"
+
+[node name="Visual" type="Node" parent="."]
+script = ExtResource("2_visual")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -21)
+shape = SubResource("RectangleShape2D_3xmdd")

@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://caw5tg6xgij1k"]
+
+[ext_resource type="Script" uid="uid://cme6b62j0py7x" path="res://scripts/construction/BuildSite.gd" id="1_site"]
+[ext_resource type="PackedScene" uid="uid://dxy47isov7vvx" path="res://scenes/buildings/Wall.tscn" id="2_wall"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_smrxl"]
+size = Vector2(68, 22)
+
+[node name="BuildSite" type="Area2D" unique_id=924804226]
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("1_site")
+wall_scene = ExtResource("2_wall")
+
+[node name="Marker" type="Polygon2D" parent="." unique_id=1719623935]
+position = Vector2(0, -10)
+color = Color(0.45, 0.45, 0.45, 1)
+polygon = PackedVector2Array(-34, 10, -18, -12, 18, -12, 34, 10)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=13827614]
+position = Vector2(0, -11)
+shape = SubResource("RectangleShape2D_smrxl")
+
+[node name="BuildMarker" type="Marker2D" parent="." unique_id=958241804]
+
+[node name="WorkMarker" type="Marker2D" parent="." unique_id=781601891]
+position = Vector2(-48, 0)
+
+[node name="PromptLabel" type="Label" parent="." unique_id=1766422232]
+visible = false
+offset_left = -118.0
+offset_top = -112.0
+offset_right = 150.0
+offset_bottom = -86.0
+text = "E - Build Wall (3 coins)"

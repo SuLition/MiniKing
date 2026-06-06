@@ -1,0 +1,10 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Local agent/tooling state
+.agents/
+.claude/
+.codex/
+.codex_analysis/
+production/session-logs/

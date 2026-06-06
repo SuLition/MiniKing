@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://cvyx7yk1n2qdi"]
+
+[ext_resource type="Script" uid="uid://br8sy0igk7yjo" path="res://scripts/jobs/JobPoint.gd" id="1_hammer"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_07v3e"]
+size = Vector2(56, 60)
+
+[node name="HammerStand" type="Area2D" unique_id=1498475334]
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("1_hammer")
+
+[node name="Stand" type="Polygon2D" parent="." unique_id=119509231]
+position = Vector2(0, -24)
+color = Color(0.58, 0.36, 0.18, 1)
+polygon = PackedVector2Array(-28, 24, -16, -24, 16, -24, 28, 24)
+
+[node name="HammerIcon" type="Polygon2D" parent="." unique_id=1438997936]
+position = Vector2(4, -52)
+color = Color(0.82, 0.82, 0.76, 1)
+polygon = PackedVector2Array(-28, -8, 20, -8, 20, 8, -28, 8)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=206837936]
+position = Vector2(0, -30)
+shape = SubResource("RectangleShape2D_07v3e")
+
+[node name="ToolPickupPoint" type="Marker2D" parent="." unique_id=2105934221]
+
+[node name="PromptLabel" type="Label" parent="." unique_id=450345332]
+visible = false
+offset_left = -110.0
+offset_top = -118.0
+offset_right = 150.0
+offset_bottom = -92.0
+text = "E - Buy Hammer (2 coins)"

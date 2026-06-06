@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://dydwc54jy6sv8"]
+
+[ext_resource type="Script" uid="uid://d2r4wsmqidx0b" path="res://scripts/recruitment/RecruitCamp.gd" id="1_axde3"]
+[ext_resource type="PackedScene" uid="uid://dsxhlg4md37e8" path="res://scenes/npc/Villager.tscn" id="2_w28yq"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vgses"]
+size = Vector2(88, 56)
+
+[node name="RecruitCamp" type="Area2D" unique_id=136552039]
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("1_axde3")
+villager_scene = ExtResource("2_w28yq")
+
+[node name="CampMarker" type="Polygon2D" parent="." unique_id=210712404]
+position = Vector2(0, -28)
+color = Color(0.86, 0.62, 0.24, 1)
+polygon = PackedVector2Array(-44, 28, -24, -28, 24, -28, 44, 28)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=892837431]
+position = Vector2(0, -28)
+shape = SubResource("RectangleShape2D_vgses")
+
+[node name="SpawnPoint" type="Marker2D" parent="." unique_id=529917940]
+position = Vector2(64, 0)
+
+[node name="PromptLabel" type="Label" parent="." unique_id=689928456]
+visible = false
+offset_left = -88.0
+offset_top = -108.0
+offset_right = 126.0
+offset_bottom = -82.0
+text = "E - Recruit (1 coin)"
